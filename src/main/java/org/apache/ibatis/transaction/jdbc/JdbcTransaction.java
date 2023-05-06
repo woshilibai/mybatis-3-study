@@ -58,6 +58,7 @@ public class JdbcTransaction implements Transaction {
   @Override
   public Connection getConnection() throws SQLException {
     if (connection == null) {
+      //  获取数据库连接
       openConnection();
     }
     return connection;
@@ -136,6 +137,7 @@ public class JdbcTransaction implements Transaction {
     if (log.isDebugEnabled()) {
       log.debug("Opening JDBC Connection");
     }
+    //  获取
     connection = dataSource.getConnection();
     if (level != null) {
       connection.setTransactionIsolation(level.getLevel());

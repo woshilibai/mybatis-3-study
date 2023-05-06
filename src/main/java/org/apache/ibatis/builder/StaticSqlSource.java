@@ -28,6 +28,7 @@ import org.apache.ibatis.session.Configuration;
 public class StaticSqlSource implements SqlSource {
 
   private final String sql;
+  //  封装#{}内部的标识符，用于执行sql时参数设置，知道获取什么变量的值进行设置
   private final List<ParameterMapping> parameterMappings;
   private final Configuration configuration;
 

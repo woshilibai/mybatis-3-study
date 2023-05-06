@@ -79,10 +79,12 @@ public class XMLConfigBuilder extends BaseBuilder {
   }
 
   public XMLConfigBuilder(InputStream inputStream, String environment, Properties props) {
+    //  XPathParser解析器，内部已经将核心配置文件的inputStream解析为document对象
     this(new XPathParser(inputStream, true, props, new XMLMapperEntityResolver()), environment, props);
   }
 
   private XMLConfigBuilder(XPathParser parser, String environment, Properties props) {
+    //  这行代码很关键，完成configuration对象的初始化
     super(new Configuration());
     ErrorContext.instance().resource("SQL Mapper Configuration");
     this.configuration.setVariables(props);
@@ -113,9 +115,11 @@ public class XMLConfigBuilder extends BaseBuilder {
       reflectorFactoryElement(root.evalNode("reflectorFactory"));
       settingsElement(settings);
       // read it after objectFactory and objectWrapperFactory issue #631
+      //  解析<environments>元素，包括事务工厂配置，数据源配置
       environmentsElement(root.evalNode("environments"));
       databaseIdProviderElement(root.evalNode("databaseIdProvider"));
       typeHandlerElement(root.evalNode("typeHandlers"));
+      //  解析<mappers>标签
       mapperElement(root.evalNode("mappers"));
     } catch (Exception e) {
       throw new BuilderException("Error parsing SQL Mapper Configuration. Cause: " + e, e);
@@ -270,18 +274,24 @@ public class XMLConfigBuilder extends BaseBuilder {
 
   private void environmentsElement(XNode context) throws Exception {
     if (context != null) {
+      //  未指定环境时，取默认环境
       if (environment == null) {
         environment = context.getStringAttribute("default");
       }
+      //  遍历<environment>子元素
       for (XNode child : context.getChildren()) {
         String id = child.getStringAttribute("id");
+        //  判断当前<environment>的id是否是默认指定的环境
         if (isSpecifiedEnvironment(id)) {
+          //  事务工厂配置
           TransactionFactory txFactory = transactionManagerElement(child.evalNode("transactionManager"));
+          //  数据源工厂配置
           DataSourceFactory dsFactory = dataSourceElement(child.evalNode("dataSource"));
           DataSource dataSource = dsFactory.getDataSource();
           Environment.Builder environmentBuilder = new Environment.Builder(id)
               .transactionFactory(txFactory)
               .dataSource(dataSource);
+          //  构建environment对象，保存到configuration对象
           configuration.setEnvironment(environmentBuilder.build());
         }
       }
@@ -358,6 +368,7 @@ public class XMLConfigBuilder extends BaseBuilder {
 
   private void mapperElement(XNode parent) throws Exception {
     if (parent != null) {
+      //  遍历<mapper>
       for (XNode child : parent.getChildren()) {
         if ("package".equals(child.getName())) {
           String mapperPackage = child.getStringAttribute("name");
@@ -366,17 +377,20 @@ public class XMLConfigBuilder extends BaseBuilder {
           String resource = child.getStringAttribute("resource");
           String url = child.getStringAttribute("url");
           String mapperClass = child.getStringAttribute("class");
-          if (resource != null && url == null && mapperClass == null) {
+
+          if (resource != null && url == null && mapperClass == null) { //  采用<mapper resource="mapper/UserMapper.xml"></mapper>引入mapper文件
             ErrorContext.instance().resource(resource);
+            //  加载mapper映射文件，转为字节流
             InputStream inputStream = Resources.getResourceAsStream(resource);
+            //  mapper映射文件解析器  1、inputStream转为document  2、核心配置configuration向下传递
             XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, resource, configuration.getSqlFragments());
             mapperParser.parse();
-          } else if (resource == null && url != null && mapperClass == null) {
+          } else if (resource == null && url != null && mapperClass == null) {  //  采用<mapper url="..."></mapper>引入mapper文件
             ErrorContext.instance().resource(url);
             InputStream inputStream = Resources.getUrlAsStream(url);
             XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, url, configuration.getSqlFragments());
             mapperParser.parse();
-          } else if (resource == null && url == null && mapperClass != null) {
+          } else if (resource == null && url == null && mapperClass != null) {  //  采用<mapper class="..."></mapper>引入mapper文件
             Class<?> mapperInterface = Resources.classForName(mapperClass);
             configuration.addMapper(mapperInterface);
           } else {

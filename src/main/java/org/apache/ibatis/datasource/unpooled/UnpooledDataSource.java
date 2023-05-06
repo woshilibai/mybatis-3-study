@@ -198,6 +198,7 @@ public class UnpooledDataSource implements DataSource {
 
   private Connection doGetConnection(Properties properties) throws SQLException {
     initializeDriver();
+    //  真正的创建数据库连接
     Connection connection = DriverManager.getConnection(url, properties);
     configureConnection(connection);
     return connection;

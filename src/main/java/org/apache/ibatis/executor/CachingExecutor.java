@@ -93,14 +93,19 @@ public class CachingExecutor implements Executor {
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql)
       throws SQLException {
     Cache cache = ms.getCache();
+    //  <cache/>
     if (cache != null) {
       flushCacheIfRequired(ms);
+      //  当前sql语句开启了缓存  <select useCache="true"...>
       if (ms.isUseCache() && resultHandler == null) {
         ensureNoOutParams(ms, boundSql);
+        //  从二级缓存获取查询
         @SuppressWarnings("unchecked")
         List<E> list = (List<E>) tcm.getObject(cache, key);
+        //  二级缓存不存在时，则委派给真正的executor进行查询，executor会先查询一级缓存，不存在再查询数据库
         if (list == null) {
           list = delegate.<E> query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
+          //  保存到二级缓存
           tcm.putObject(cache, key, list); // issue #578 and #116
         }
         return list;

@@ -87,6 +87,7 @@ public class PooledDataSource implements DataSource {
 
   @Override
   public Connection getConnection() throws SQLException {
+    //  根据db四要素进行创建并返回，也可能是从连接池中获取
     return popConnection(dataSource.getUsername(), dataSource.getPassword()).getProxyConnection();
   }
 
@@ -401,6 +402,7 @@ public class PooledDataSource implements DataSource {
           // Pool does not have available connection
           if (state.activeConnections.size() < poolMaximumActiveConnections) {
             // Can create new connection
+            // 这里进行数据库连接的创建
             conn = new PooledConnection(dataSource.getConnection(), this);
             if (log.isDebugEnabled()) {
               log.debug("Created connection " + conn.getRealHashCode() + ".");

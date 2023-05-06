@@ -143,6 +143,12 @@
   </properties>
 
   <dependencies>
+
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>8.0.29</version>
+    </dependency>
     <dependency>
       <groupId>ognl</groupId>
       <artifactId>ognl</artifactId>
@@ -273,6 +279,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
           <testCompilerArgument>${maven.compiler.testCompilerArgument}</testCompilerArgument>
+            <source>8</source>
+            <target>8</target>
         </configuration>
       </plugin>
       <plugin>

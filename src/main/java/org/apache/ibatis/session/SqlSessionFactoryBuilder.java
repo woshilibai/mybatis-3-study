@@ -74,7 +74,15 @@ public class SqlSessionFactoryBuilder {
 
   public SqlSessionFactory build(InputStream inputStream, String environment, Properties properties) {
     try {
+      /**
+       * mybatis核心配置文件解析器， 这里的environment表示多环境配置
+       * 1、完成核心配置文件inputStream到document对象的解析
+       * 2、完成configuration对象的初始化
+        */
       XMLConfigBuilder parser = new XMLConfigBuilder(inputStream, environment, properties);
+      /**
+       * parse() 对核心配置文件进行解析，会进而加载并解析mapper映射文件
+       */
       return build(parser.parse());
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error building SqlSession.", e);

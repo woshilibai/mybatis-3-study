@@ -172,6 +172,7 @@ public class Configuration {
   }
 
   public Configuration() {
+    //  别名注册
     typeAliasRegistry.registerAlias("JDBC", JdbcTransactionFactory.class);
     typeAliasRegistry.registerAlias("MANAGED", ManagedTransactionFactory.class);
 
@@ -575,6 +576,7 @@ public class Configuration {
     } else {
       executor = new SimpleExecutor(this, transaction);
     }
+    //  如果开启了二级缓存(跨session级别)，会用cachingExecutor对原生的executor进行包装， 如果开启了二级缓存，查询过程是二级缓存->一级缓存->数据库
     if (cacheEnabled) {
       executor = new CachingExecutor(executor);
     }
